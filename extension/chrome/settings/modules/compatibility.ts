@@ -7,6 +7,7 @@ import { Ui } from '../../../js/common/browser/ui.js';
 import { View } from '../../../js/common/view.js';
 import { Xss } from '../../../js/common/platform/xss.js';
 import { KeyUtil, Key } from '../../../js/common/core/crypto/key.js';
+import { Api } from '../../../js/common/api/shared/api.js';
 
 View.run(
   class CompatibilityView extends View {
@@ -22,6 +23,7 @@ View.run(
 
     public setHandlers = () => {
       $('.action_test_key').on('click', this.setHandlerPrevent('double', this.actionTestKeyHandler));
+      $('.action_load_public_key').on('click', this.setHandlerPrevent('double', this.actionLoadPublicKey))
       $('#input_passphrase').keydown(this.setEnterHandlerThatClicks('.action_test_key'));
     };
 
@@ -54,6 +56,13 @@ View.run(
           this.appendResult(`${kn} ${entry[0]}: ${entry[1]}`);
         }
       }
+    };
+
+    private actionLoadPublicKey = async () => {
+      const keyid_or_email = String($('.input_keyid_or_email').val());
+      const buf = await Api.download(`https://flowcrypt.com/attester/pub/${keyid_or_email}`);
+      const publicKey = buf.toUtfStr();
+      $('.input_key').val(publicKey);
     };
 
     private actionTestKeyHandler = async (submitBtn: HTMLElement) => {
